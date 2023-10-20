@@ -278,8 +278,8 @@ int ABTD_signal_timer_delete(ABTD_signal_timer timer)
 int ABTD_signal_timer_kill(ABTD_xstream_context ctx)
 {
     int abt_errno = ABT_SUCCESS;
-    if (pthread_kill(ctx, ABTD_SIGNAL_TIMER) != 0) {
-        HANDLE_ERROR("pthread_kill");
+    if (real_pthread_kill(ctx, ABTD_SIGNAL_TIMER) != 0) {
+        HANDLE_ERROR("real_pthread_kill");
         abt_errno = ABT_ERR_OTHER;
     }
     return abt_errno;
@@ -289,8 +289,8 @@ static inline
 int ABTDI_signal_mask(int how, sigset_t *p_mask, sigset_t *p_old_mask)
 {
     int abt_errno = ABT_SUCCESS;
-    if (pthread_sigmask(how, p_mask, p_old_mask) != 0) {
-        HANDLE_ERROR("pthread_sigmask");
+    if (real_pthread_sigmask(how, p_mask, p_old_mask) != 0) {
+        HANDLE_ERROR("real_pthread_sigmask");
         abt_errno = ABT_ERR_OTHER;
     }
     return abt_errno;
@@ -323,8 +323,8 @@ int ABTD_signal_change_num_es_block(void)
 int ABTD_signal_wakeup(ABTD_xstream_context ctx)
 {
     int abt_errno = ABT_SUCCESS;
-    if (pthread_kill(ctx, ABTD_SIGNAL_WAKEUP) != 0) {
-        HANDLE_ERROR("pthread_kill");
+    if (real_pthread_kill(ctx, ABTD_SIGNAL_WAKEUP) != 0) {
+        HANDLE_ERROR("real_pthread_kill");
         abt_errno = ABT_ERR_OTHER;
     }
     return abt_errno;

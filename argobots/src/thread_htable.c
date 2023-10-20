@@ -19,7 +19,7 @@ ABTI_thread_htable *ABTI_thread_htable_create(uint32_t num_rows)
 #elif defined(HAVE_CLH_H)
     clh_init(&p_htable->mutex);
 #elif defined(USE_PTHREAD_MUTEX)
-    int ret = pthread_mutex_init(&p_htable->mutex, NULL);
+    int ret = real_pthread_mutex_init(&p_htable->mutex, NULL);
     assert(!ret);
 #else
     ABTI_spinlock_create(&p_htable->mutex);
@@ -43,7 +43,7 @@ void ABTI_thread_htable_free(ABTI_thread_htable *p_htable)
 #elif defined(HAVE_CLH_H)
     clh_destroy(&p_htable->mutex);
 #elif defined(USE_PTHREAD_MUTEX)
-    int ret = pthread_mutex_destroy(&p_htable->mutex);
+    int ret = real_pthread_mutex_destroy(&p_htable->mutex);
     assert(!ret);
 #else
     ABTI_spinlock_free(&p_htable->mutex);

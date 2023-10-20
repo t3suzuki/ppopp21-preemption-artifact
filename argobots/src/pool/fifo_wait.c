@@ -72,8 +72,8 @@ int pool_init(ABT_pool pool, ABT_pool_config config)
 
     data_t *p_data = (data_t *)ABTU_malloc(sizeof(data_t));
 
-    pthread_mutex_init(&p_data->mutex, NULL);
-    pthread_cond_init(&p_data->cond, NULL);
+    real_pthread_mutex_init(&p_data->mutex, NULL);
+    real_pthread_cond_init(&p_data->cond, NULL);
 
     p_data->num_units = 0;
     p_data->p_head = NULL;
@@ -91,8 +91,8 @@ static int pool_free(ABT_pool pool)
     void *data = ABTI_pool_get_data(p_pool);
     data_t *p_data = pool_get_data_ptr(data);
 
-    pthread_mutex_destroy(&p_data->mutex);
-    pthread_cond_destroy(&p_data->cond);
+    real_pthread_mutex_destroy(&p_data->mutex);
+    real_pthread_cond_destroy(&p_data->cond);
     ABTU_free(p_data);
 
     return abt_errno;
@@ -113,7 +113,7 @@ static void pool_push(ABT_pool pool, ABT_unit unit)
     data_t *p_data = pool_get_data_ptr(data);
     unit_t *p_unit = (unit_t *)unit;
 
-    pthread_mutex_lock(&p_data->mutex);
+    real_pthread_mutex_lock(&p_data->mutex);
     if (p_data->num_units == 0) {
         p_unit->p_prev = p_unit;
         p_unit->p_next = p_unit;
@@ -131,8 +131,8 @@ static void pool_push(ABT_pool pool, ABT_unit unit)
     p_data->num_units++;
 
     p_unit->pool = pool;
-    pthread_cond_signal(&p_data->cond);
-    pthread_mutex_unlock(&p_data->mutex);
+    real_pthread_cond_signal(&p_data->cond);
+    real_pthread_mutex_unlock(&p_data->mutex);
 }
 
 static inline void convert_double_sec_to_timespec(struct timespec *ts_out,
@@ -150,13 +150,13 @@ static ABT_unit pool_pop_timedwait(ABT_pool pool, double abstime_secs)
     unit_t *p_unit = NULL;
     ABT_unit h_unit = ABT_UNIT_NULL;
 
-    pthread_mutex_lock(&p_data->mutex);
+    real_pthread_mutex_lock(&p_data->mutex);
 
     if(!p_data->num_units)
     {
         struct timespec ts;
         convert_double_sec_to_timespec(&ts, abstime_secs);
-        pthread_cond_timedwait(&p_data->cond, &p_data->mutex, &ts);
+        real_pthread_cond_timedwait(&p_data->cond, &p_data->mutex, &ts);
     }
 
     if (p_data->num_units > 0) {
@@ -177,7 +177,7 @@ static ABT_unit pool_pop_timedwait(ABT_pool pool, double abstime_secs)
 
         h_unit = (ABT_unit)p_unit;
     }
-    pthread_mutex_unlock(&p_data->mutex);
+    real_pthread_mutex_unlock(&p_data->mutex);
 
     return h_unit;
 }
@@ -190,7 +190,7 @@ static ABT_unit pool_pop(ABT_pool pool)
     unit_t *p_unit = NULL;
     ABT_unit h_unit = ABT_UNIT_NULL;
 
-    pthread_mutex_lock(&p_data->mutex);
+    real_pthread_mutex_lock(&p_data->mutex);
     if (p_data->num_units > 0) {
         p_unit = p_data->p_head;
         if (p_data->num_units == 1) {
@@ -209,7 +209,7 @@ static ABT_unit pool_pop(ABT_pool pool)
 
         h_unit = (ABT_unit)p_unit;
     }
-    pthread_mutex_unlock(&p_data->mutex);
+    real_pthread_mutex_unlock(&p_data->mutex);
 
     return h_unit;
 }
@@ -225,7 +225,7 @@ static int pool_remove(ABT_pool pool, ABT_unit unit)
     ABTI_CHECK_TRUE_RET(p_unit->pool != ABT_POOL_NULL, ABT_ERR_POOL);
     ABTI_CHECK_TRUE_MSG_RET(p_unit->pool == pool, ABT_ERR_POOL, "Not my pool");
 
-    pthread_mutex_lock(&p_data->mutex);
+    real_pthread_mutex_lock(&p_data->mutex);
     if (p_data->num_units == 1) {
         p_data->p_head = NULL;
         p_data->p_tail = NULL;
@@ -241,7 +241,7 @@ static int pool_remove(ABT_pool pool, ABT_unit unit)
     p_data->num_units--;
 
     p_unit->pool = ABT_POOL_NULL;
-    pthread_mutex_unlock(&p_data->mutex);
+    real_pthread_mutex_unlock(&p_data->mutex);
 
     p_unit->p_prev = NULL;
     p_unit->p_next = NULL;
@@ -257,7 +257,7 @@ static int pool_print_all(ABT_pool pool, void *arg,
     data_t *p_data = pool_get_data_ptr(data);
 
     ABT_pool_get_access(pool, &access);
-    pthread_mutex_lock(&p_data->mutex);
+    real_pthread_mutex_lock(&p_data->mutex);
 
     size_t num_units = p_data->num_units;
     unit_t *p_unit = p_data->p_head;
@@ -268,7 +268,7 @@ static int pool_print_all(ABT_pool pool, void *arg,
         p_unit = p_unit->p_next;
     }
 
-    pthread_mutex_unlock(&p_data->mutex);
+    real_pthread_mutex_unlock(&p_data->mutex);
 
     return ABT_SUCCESS;
 }

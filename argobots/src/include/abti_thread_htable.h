@@ -65,8 +65,8 @@ struct ABTI_thread_htable {
 #define ABTI_THREAD_HTABLE_LOCK(m)      clh_acquire(&m)
 #define ABTI_THREAD_HTABLE_UNLOCK(m)    clh_release(&m)
 #elif defined(USE_PTHREAD_MUTEX)
-#define ABTI_THREAD_HTABLE_LOCK(m)      pthread_mutex_lock(&m)
-#define ABTI_THREAD_HTABLE_UNLOCK(m)    pthread_mutex_unlock(&m)
+#define ABTI_THREAD_HTABLE_LOCK(m)      real_pthread_mutex_lock(&m)
+#define ABTI_THREAD_HTABLE_UNLOCK(m)    real_pthread_mutex_unlock(&m)
 #else
 #define ABTI_THREAD_HTABLE_LOCK(m)      ABTI_spinlock_acquire(&m)
 #define ABTI_THREAD_HTABLE_UNLOCK(m)    ABTI_spinlock_release(&m)

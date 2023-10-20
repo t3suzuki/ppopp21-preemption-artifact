@@ -412,7 +412,7 @@ int ABT_preemption_timer_start(ABT_preemption_group group)
             ABTI_CHECK_ERROR(abt_errno);
         } else {
             while (!ABTD_atomic_load_int32(&p_ptimer->sleep_flag)) {
-                sched_yield();
+                real_sched_yield();
             }
             ABTD_atomic_store_uint32(&p_ptimer->start_flag, 1);
             abt_errno = ABTD_futex_wakeup(&p_ptimer->sleep_flag);
@@ -448,7 +448,7 @@ int ABT_preemption_timer_stop(ABT_preemption_group group)
             ABTI_CHECK_ERROR(abt_errno);
         } else {
             while (!ABTD_atomic_load_int32(&p_ptimer->sleep_flag)) {
-                sched_yield();
+                real_sched_yield();
             }
             ABTD_atomic_store_uint32(&p_ptimer->stop_flag, 1);
             abt_errno = ABTD_futex_wakeup(&p_ptimer->sleep_flag);
@@ -510,7 +510,7 @@ int ABT_preemption_timer_delete(ABT_preemption_group group)
             ABTI_xstream *p_xstream = p_group->p_xstreams[i];
             ABTI_preemption_timer *p_ptimer = p_xstream->p_preemption_timer;
             while (!ABTD_atomic_load_int32(&p_ptimer->sleep_flag)) {
-                sched_yield();
+                real_sched_yield();
             }
             ABTD_atomic_store_uint32(&p_ptimer->terminate_flag, 1);
             abt_errno = ABTD_futex_wakeup(&p_ptimer->sleep_flag);
