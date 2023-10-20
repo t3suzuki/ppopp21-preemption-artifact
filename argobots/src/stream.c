@@ -81,6 +81,7 @@ int ABTI_xstream_create(ABTI_sched *p_sched, ABTI_xstream **pp_xstream)
     p_newxstream->p_req_arg          = NULL;
     p_newxstream->p_main_sched       = NULL;
     p_newxstream->preemptive         = ABT_FALSE;
+    p_newxstream->user_preemptive    = ABT_TRUE;
     p_newxstream->ptimer_on          = ABT_FALSE;
     p_newxstream->p_preemption_timer = NULL;
     p_newxstream->p_wakeup_thread    = NULL;

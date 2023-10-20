@@ -43,6 +43,13 @@ int ABT_preemption_profile(int ult_id, int rank, int seq, int n_preemption)
 }
 #endif
 
+int ABT_preemption_set_user_preemptive(ABT_bool v)
+{
+    ABTI_xstream *p_xstream = ABTI_local_get_xstream();
+    p_xstream->user_preemptive = v;
+    return 0;
+}
+
 static inline
 void ABTI_preemption_timer_on_sleep(void *p_arg)
 {
@@ -156,7 +163,7 @@ int ABTI_preemption_timer_preempt(void)
 static inline
 ABT_bool ABTI_preemption_timer_check_preemptive(ABTI_xstream *p_xstream)
 {
-    return p_xstream->preemptive;
+    return p_xstream->preemptive && p_xstream->user_preemptive;
 }
 
 static inline
