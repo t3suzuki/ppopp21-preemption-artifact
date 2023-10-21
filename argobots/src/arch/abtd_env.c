@@ -133,7 +133,7 @@ void ABTD_env_init(ABTI_global *p_global)
     /* Preemption timer type */
     env = getenv("ABT_PREEMPTION_TIMER_TYPE");
     if (env == NULL) env = getenv("ABT_ENV_PREEMPTION_TIMER_TYPE");
-    p_global->preemption_timer_type = ABTI_PREEMPTION_TIMER_SIGNAL;
+    p_global->preemption_timer_type = ABTI_PREEMPTION_TIMER_DEDICATED;//ABTI_PREEMPTION_TIMER_SIGNAL;
     if (env != NULL) {
         if (strcasecmp(env, "signal") == 0) {
             p_global->preemption_timer_type = ABTI_PREEMPTION_TIMER_SIGNAL;
