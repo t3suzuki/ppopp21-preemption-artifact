@@ -43,8 +43,10 @@ void ABTI_mutex_init(ABTI_mutex *p_mutex)
 {
     p_mutex->val = 0;
     p_mutex->attr.attrs = ABTI_MUTEX_ATTR_NONE;
-    p_mutex->attr.max_handovers = ABTI_global_get_mutex_max_handovers();
-    p_mutex->attr.max_wakeups = ABTI_global_get_mutex_max_wakeups();
+    //p_mutex->attr.max_handovers = ABTI_global_get_mutex_max_handovers();
+    p_mutex->attr.max_handovers = 64;
+    //p_mutex->attr.max_wakeups = ABTI_global_get_mutex_max_wakeups();
+    p_mutex->attr.max_wakeups = 1;
 #ifndef ABT_CONFIG_USE_SIMPLE_MUTEX
     p_mutex->p_htable = ABTI_thread_htable_create(gp_ABTI_global->max_xstreams);
     p_mutex->p_handover = NULL;
