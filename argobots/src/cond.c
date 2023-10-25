@@ -32,7 +32,25 @@ int ABT_cond_create(ABT_cond *newcond)
 
     p_newcond = (ABTI_cond *)ABTU_malloc(sizeof(ABTI_cond));
     ABTI_cond_init(p_newcond);
+    p_newcond->clkid = CLOCK_REALTIME;
 
+    /* Return value */
+    *newcond = ABTI_cond_get_handle(p_newcond);
+
+    ABTI_LEAVE;
+    return abt_errno;
+}
+
+int ABT_cond_create2(ABT_cond *newcond, int clkid)
+{
+    ABTI_ENTER;
+    int abt_errno = ABT_SUCCESS;
+    ABTI_cond *p_newcond;
+
+    p_newcond = (ABTI_cond *)ABTU_malloc(sizeof(ABTI_cond));
+    ABTI_cond_init(p_newcond);
+    p_newcond->clkid = clkid;
+    
     /* Return value */
     *newcond = ABTI_cond_get_handle(p_newcond);
 
@@ -126,11 +144,11 @@ double convert_timespec_to_sec(const struct timespec *p_ts)
 }
 
 static inline
-double get_cur_time(void)
+double get_cur_time(int clkid)
 {
 #if defined(HAVE_CLOCK_GETTIME)
     struct timespec ts;
-    clock_gettime(CLOCK_REALTIME, &ts);
+    clock_gettime(clkid, &ts);
     return convert_timespec_to_sec(&ts);
 #elif defined(HAVE_GETTIMEOFDAY)
     struct timeval tv;
@@ -251,7 +269,7 @@ int ABT_cond_timedwait(ABT_cond cond, ABT_mutex mutex,
     ABTI_mutex_unlock(p_mutex);
 
     while (!ABTD_atomic_load_int32(&ext_signal)) {
-        double cur_time = get_cur_time();
+        double cur_time = get_cur_time(p_cond->clkid);
         if (cur_time >= tar_time) {
             remove_unit(p_cond, p_unit);
             abt_errno = ABT_ERR_COND_TIMEDOUT;

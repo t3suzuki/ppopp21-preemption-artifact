@@ -525,6 +525,7 @@ struct ABTI_ktable {
 
 struct ABTI_cond {
     ABTI_spinlock lock;
+    int clkid;
     ABTI_mutex *p_waiter_mutex;
     size_t num_waiters;
     ABTI_unit *p_head;          /* Head of waiters */
