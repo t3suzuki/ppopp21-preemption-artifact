@@ -161,6 +161,7 @@ void ABTD_env_init(ABTI_global *p_global)
     } else {
         p_global->initial_num_sub_xstreams = 1;
     }
+    printf("initial_num_sub_xstreams %d\n", p_global->initial_num_sub_xstreams);
 
     /* Mutex attributes */
     env = getenv("ABT_MUTEX_MAX_HANDOVERS");

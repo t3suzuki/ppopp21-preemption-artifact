@@ -341,7 +341,6 @@ struct ABTI_xstream {
     ABTD_xstream_context ctx;   /* ES context */
 
     ABT_bool preemptive;
-    ABT_bool user_preemptive;
     ABT_bool ptimer_on;
     ABTI_preemption_timer *p_preemption_timer;
 
