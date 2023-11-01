@@ -365,7 +365,8 @@ int ABTD_futex_sleep(int *p_sleep_flag,
     if (callback_fn) {
         callback_fn(p_arg);
     }
-    syscall(SYS_futex, p_sleep_flag, FUTEX_WAIT, 1, NULL, NULL, 0);
+    //syscall(SYS_futex, p_sleep_flag, FUTEX_WAIT, 1, NULL, NULL, 0);
+    syscall(SYS_futex, p_sleep_flag, FUTEX_WAIT, 1, NULL, 0xdeadcafe, 0);
 
     return abt_errno;
 }
