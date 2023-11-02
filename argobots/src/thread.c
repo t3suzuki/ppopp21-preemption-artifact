@@ -987,6 +987,28 @@ int ABT_thread_yield(void)
     goto fn_exit;
 }
 
+int ABT_thread_is_sched(void)
+{
+    ABTI_ENTER;
+    int ret = 0;
+    ABTI_thread *p_thread = NULL;
+    
+    /* If this routine is called by non-ULT, just return. */
+    if (lp_ABTI_local != NULL) {
+        p_thread = ABTI_local_get_thread();
+    }
+    if (p_thread == NULL) goto fn_exit;
+    
+    ret = (int)p_thread->is_sched;
+    
+ fn_exit:
+    ABTI_LEAVE;
+    return ret;
+    
+ fn_fail:
+    goto fn_exit;
+}
+
 /**
  * @ingroup ULT
  * @brief   Resume the target ULT.
