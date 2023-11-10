@@ -66,6 +66,7 @@ int ABT_sched_create(ABT_sched_def *def, int num_pools, ABT_pool *pools,
 
     p_sched->used          = ABTI_SCHED_NOT_USED;
     p_sched->automatic     = ABT_FALSE;
+    p_sched->started       = ABT_FALSE;
     p_sched->kind          = ABTI_sched_get_kind(def);
     p_sched->state         = ABT_SCHED_STATE_READY;
     p_sched->request       = 0;

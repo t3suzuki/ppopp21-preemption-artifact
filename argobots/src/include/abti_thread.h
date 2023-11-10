@@ -261,6 +261,7 @@ void ABTI_thread_context_switch_sched_to_thread_internal(ABTI_sched *p_old,
         return;
     }
 #endif
+    p_old->started       = ABT_TRUE;
     if (is_finish) {
         ABTD_thread_finish_context(p_old->p_ctx, &p_new->ctx);
     } else {
@@ -388,6 +389,8 @@ void ABTI_thread_yield(ABTI_thread *p_thread)
 {
     ABTI_sched *p_sched;
 
+    if (p_thread->p_last_xstream->p_main_sched->started == ABT_FALSE) return;
+    
     LOG_EVENT("[U%" PRIu64 ":E%d] yield\n",
               ABTI_thread_get_id(p_thread), p_thread->p_last_xstream->rank);
 

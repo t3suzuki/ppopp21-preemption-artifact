@@ -373,7 +373,7 @@ struct ABTI_sched {
     ABTI_task *p_task;          /* Associated tasklet */
     ABTD_thread_context *p_ctx; /* Context */
     void *data;                 /* Data for a specific scheduler */
-
+    ABT_bool started;
     /* Scheduler functions */
     ABT_sched_init_fn init;
     ABT_sched_run_fn  run;
