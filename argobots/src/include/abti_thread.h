@@ -389,7 +389,7 @@ void ABTI_thread_yield(ABTI_thread *p_thread)
 {
     ABTI_sched *p_sched;
 
-    if (p_thread->p_last_xstream->p_main_sched->started == ABT_FALSE) return;
+    if ((p_thread->p_last_xstream->p_main_sched->started == ABT_FALSE) || (p_thread->is_sched)) return;
     
     LOG_EVENT("[U%" PRIu64 ":E%d] yield\n",
               ABTI_thread_get_id(p_thread), p_thread->p_last_xstream->rank);

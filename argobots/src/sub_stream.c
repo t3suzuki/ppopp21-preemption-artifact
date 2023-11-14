@@ -436,10 +436,12 @@ int ABTI_sub_xstream_list_local_init(ABTI_sub_xstream_list_local *p_sub_list,
     p_sub_xstream->affinity        = ABTI_local_get_xstream()->rank;
     p_sub_xstream->p_return_thread = NULL;
     p_sub_xstream->timer_started   = 0;
+    /*
     abt_errno = ABTI_thread_create_internal(
             ABTI_xstream_trampoline_thread, NULL,
             &p_sub_xstream->p_base_thread);
     ABTI_CHECK_ERROR(abt_errno);
+    */
 
     ABTD_xstream_context_self(&p_sub_xstream->ctx);
 
