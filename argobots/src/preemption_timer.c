@@ -94,7 +94,11 @@ int ABTI_preemption_timer_preempt(void)
         ABTI_LEAVE;
     } else if (p_attr->preemption_type == ABT_PREEMPTION_NEW_ES) {
         ABTI_sub_xstream *p_sub_xstream = ABTI_sub_xstream_get_data();
-
+        
+        if (p_sub_xstream->p_base_thread == NULL) {
+            return abt_errno;
+        }
+        
         /* get an available sub ES */
         ABTI_sub_xstream_list_local *p_sub_list = &p_xstream->sub_xstream_list;
         ABTI_sub_xstream *p_next_sub;
