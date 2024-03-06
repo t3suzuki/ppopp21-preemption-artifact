@@ -570,6 +570,7 @@ int ABT_mutex_attr_set_recursive(ABT_mutex_attr attr, ABT_bool recursive) ABT_AP
 
 /* Condition variable */
 int ABT_cond_create(ABT_cond *newcond) ABT_API_PUBLIC;
+int ABT_cond_create2(ABT_cond *newcond, int clkid) ABT_API_PUBLIC;
 int ABT_cond_free(ABT_cond *cond) ABT_API_PUBLIC;
 int ABT_cond_wait(ABT_cond cond, ABT_mutex mutex) ABT_API_PUBLIC;
 int ABT_cond_timedwait(ABT_cond cond, ABT_mutex mutex,
