@@ -12,6 +12,7 @@
 
 /* Global Data */
 ABTI_global *gp_ABTI_global = NULL;
+static my_tls_t *my_tls = NULL;
 
 /* To indicate how many times ABT_init is called. */
 static uint32_t g_ABTI_num_inits = 0;
@@ -36,7 +37,6 @@ static inline int ABTI_init_lock_is_locked() {
 static inline void ABTI_init_lock_release() {
     ABTD_atomic_clear_uint8(&g_ABTI_init_lock);
 }
-
 
 /**
  * @ingroup ENV
@@ -342,3 +342,44 @@ void ABTI_global_update_max_xstreams(int new_size)
     }
 }
 
+#if ABT_CONFIG_USE_GS
+void ABTI_set_gsbase(ABTD_thread_context *p_newctx)
+{
+    size_t tls_size = my_tls->init_mem_size;
+    void *p;
+    int ret = posix_memalign(&p, 16, tls_size+16);
+    dtv_t *dtv = (dtv_t*)malloc(sizeof(dtv_t)*my_tls->max_used_dtv);
+    int i;
+    for (i=0; i<my_tls->max_used_dtv; i++) {
+        dtv[i].size = my_tls->dtv[i].size;
+        dtv[i].addr = p + (uint64_t)(my_tls->dtv[i].addr - my_tls->org_start);
+    }
+    assert(ret == 0);
+    memcpy(p, my_tls->init_mem, tls_size);
+    p_newctx->gsbase = (unsigned long *)(p + tls_size);
+    p_newctx->dtv = dtv;
+    *(uint64_t *)p_newctx->gsbase = (uint64_t)p_newctx->gsbase;
+}
+
+void *
+ABT_tls_get_addr(tls_get_addr_t *a)
+{
+    //printf("id=%d offset=%d\n", a->id, a->offset);
+    //dtv_t *dtv = (dtv_t *)(gs_ptr + 1);
+    ABTI_thread *p_thread = ABTI_local_get_thread();
+    dtv_t *dtv = p_thread->ctx.dtv;
+    return dtv[a->id].addr + a->offset;
+}
+
+void ABT_set_tls(my_tls_t *__my_tls)
+{
+    my_tls = __my_tls;
+}
+
+void ABT_debug()
+{
+    ABTI_thread *p_thread = NULL;
+    p_thread = ABTI_local_get_thread();
+    printf("%p current: %p\n", p_thread, p_thread->ctx.gsbase);
+}
+#endif

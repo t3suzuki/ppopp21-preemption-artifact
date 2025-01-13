@@ -16,6 +16,10 @@ typedef struct abt_ucontext_t {
     void (*f_thread)(void *);       /* ULT function */
     void *                 p_arg;   /* ULT function argument */
     struct abt_ucontext_t *p_link;  /* pointer to scheduler context */
+#if defined(ABT_CONFIG_USE_GS)
+    unsigned long *gsbase;
+    dtv_t *dtv;
+#endif
 } abt_ucontext_t;
 
 #else

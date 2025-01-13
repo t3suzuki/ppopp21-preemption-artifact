@@ -4,6 +4,7 @@
  */
 
 #include "abti.h"
+#include "real_pthread.h"
 #include <unistd.h>
 
 #ifdef HAVE_PTHREAD_SETAFFINITY_NP
@@ -126,7 +127,7 @@ void ABTD_affinity_init(void)
 void ABTD_affinity_finalize(void)
 {
 #ifdef HAVE_PTHREAD_SETAFFINITY_NP
-    pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &g_initial_cpuset);
+    real_pthread_setaffinity_np(real_pthread_self(), sizeof(cpu_set_t), &g_initial_cpuset);
 #endif
 }
 
@@ -136,7 +137,7 @@ int ABTD_affinity_set(ABTD_xstream_context ctx, int rank)
     int abt_errno;
 
     cpu_set_t cpuset = ABTD_affinity_get_cpuset_for_rank(rank);
-    if (!pthread_setaffinity_np(ctx, sizeof(cpu_set_t), &cpuset)) {
+    if (!real_pthread_setaffinity_np(ctx, sizeof(cpu_set_t), &cpuset)) {
         abt_errno = ABT_SUCCESS;
     } else {
         abt_errno = ABT_ERR_OTHER;
@@ -145,7 +146,7 @@ int ABTD_affinity_set(ABTD_xstream_context ctx, int rank)
 
 #if 0
     /* For debugging and verification */
-    int ret = pthread_getaffinity_np(ctx, sizeof(cpu_set_t), &cpuset);
+    int ret = real_pthread_getaffinity_np(ctx, sizeof(cpu_set_t), &cpuset);
     ABTI_CHECK_TRUE(!ret, ABT_ERR_OTHER);
     int i;
     for (i = 0; i < CPU_SETSIZE; i++) {
@@ -180,7 +181,7 @@ int ABTD_affinity_set_cpuset(ABTD_xstream_context ctx, int cpuset_size,
         CPU_SET(p_cpuset[i], &cpuset);
     }
 
-    i = pthread_setaffinity_np(ctx, sizeof(cpu_set_t), &cpuset);
+    i = real_pthread_setaffinity_np(ctx, sizeof(cpu_set_t), &cpuset);
     ABTI_CHECK_TRUE(!i, ABT_ERR_OTHER);
 
   fn_exit:
@@ -203,7 +204,7 @@ int ABTD_affinity_get_cpuset(ABTD_xstream_context ctx, int cpuset_size,
     cpu_set_t cpuset;
     int num_cpus = 0;
 
-    i = pthread_getaffinity_np(ctx, sizeof(cpu_set_t), &cpuset);
+    i = real_pthread_getaffinity_np(ctx, sizeof(cpu_set_t), &cpuset);
     ABTI_CHECK_TRUE(!i, ABT_ERR_OTHER);
 
     if (p_cpuset != NULL) {

@@ -40,6 +40,23 @@ int ABT_cond_create(ABT_cond *newcond)
     return abt_errno;
 }
 
+int ABT_cond_create2(ABT_cond *newcond, int clkid)
+{
+    ABTI_ENTER;
+    int abt_errno = ABT_SUCCESS;
+    ABTI_cond *p_newcond;
+
+    p_newcond = (ABTI_cond *)ABTU_malloc(sizeof(ABTI_cond));
+    ABTI_cond_init(p_newcond);
+    p_newcond->clkid = clkid;
+    
+    /* Return value */
+    *newcond = ABTI_cond_get_handle(p_newcond);
+
+    ABTI_LEAVE;
+    return abt_errno;
+}
+
 /**
  * @ingroup COND
  * @brief   Free the condition variable.
@@ -126,11 +143,11 @@ double convert_timespec_to_sec(const struct timespec *p_ts)
 }
 
 static inline
-double get_cur_time(void)
+double get_cur_time(int clkid)
 {
 #if defined(HAVE_CLOCK_GETTIME)
     struct timespec ts;
-    clock_gettime(CLOCK_REALTIME, &ts);
+    clock_gettime(clkid, &ts);
     return convert_timespec_to_sec(&ts);
 #elif defined(HAVE_GETTIMEOFDAY)
     struct timeval tv;
@@ -251,7 +268,7 @@ int ABT_cond_timedwait(ABT_cond cond, ABT_mutex mutex,
     ABTI_mutex_unlock(p_mutex);
 
     while (!ABTD_atomic_load_int32(&ext_signal)) {
-        double cur_time = get_cur_time();
+        double cur_time = get_cur_time(p_cond->clkid);
         if (cur_time >= tar_time) {
             remove_unit(p_cond, p_unit);
             abt_errno = ABT_ERR_COND_TIMEDOUT;
@@ -273,6 +290,80 @@ int ABT_cond_timedwait(ABT_cond cond, ABT_mutex mutex,
     goto fn_exit;
 }
 
+int ABT_cond_clockwait(ABT_cond cond, ABT_mutex mutex,
+                       int clkid, const struct timespec *abstime)
+{
+    ABTI_ENTER;
+    int abt_errno = ABT_SUCCESS;
+    ABTI_cond *p_cond = ABTI_cond_get_ptr(cond);
+    ABTI_CHECK_NULL_COND_PTR(p_cond);
+    ABTI_mutex *p_mutex = ABTI_mutex_get_ptr(mutex);
+    ABTI_CHECK_NULL_MUTEX_PTR(p_mutex);
+
+    double tar_time = convert_timespec_to_sec(abstime);
+
+    ABTI_unit *p_unit;
+    int32_t ext_signal = 0;
+
+    p_unit = (ABTI_unit *)ABTU_calloc(1, sizeof(ABTI_unit));
+    p_unit->pool = (ABT_pool)&ext_signal;
+    p_unit->type = ABT_UNIT_TYPE_EXT;
+
+    ABTI_spinlock_acquire(&p_cond->lock);
+
+    if (p_cond->p_waiter_mutex == NULL) {
+        p_cond->p_waiter_mutex = p_mutex;
+    } else {
+        ABT_bool result = ABTI_mutex_equal(p_cond->p_waiter_mutex, p_mutex);
+        if (result == ABT_FALSE) {
+            ABTI_spinlock_release(&p_cond->lock);
+            abt_errno = ABT_ERR_INV_MUTEX;
+            goto fn_fail;
+        }
+    }
+
+    if (p_cond->num_waiters == 0) {
+        p_unit->p_prev = p_unit;
+        p_unit->p_next = p_unit;
+        p_cond->p_head = p_unit;
+        p_cond->p_tail = p_unit;
+    } else {
+        p_cond->p_tail->p_next = p_unit;
+        p_cond->p_head->p_prev = p_unit;
+        p_unit->p_prev = p_cond->p_tail;
+        p_unit->p_next = p_cond->p_head;
+        p_cond->p_tail = p_unit;
+    }
+
+    p_cond->num_waiters++;
+
+    ABTI_spinlock_release(&p_cond->lock);
+
+    /* Unlock the mutex that the calling ULT is holding */
+    ABTI_mutex_unlock(p_mutex);
+
+    while (!ABTD_atomic_load_int32(&ext_signal)) {
+        double cur_time = get_cur_time(clkid);
+        if (cur_time >= tar_time) {
+            remove_unit(p_cond, p_unit);
+            abt_errno = ABT_ERR_COND_TIMEDOUT;
+            break;
+        }
+        ABT_thread_yield();
+    }
+    ABTU_free(p_unit);
+
+    /* Lock the mutex again */
+    ABTI_mutex_lock(p_mutex);
+
+  fn_exit:
+    ABTI_LEAVE;
+    return abt_errno;
+
+  fn_fail:
+    HANDLE_ERROR_FUNC_WITH_CODE(abt_errno);
+    goto fn_exit;
+}
 
 /**
  * @ingroup COND

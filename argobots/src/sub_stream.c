@@ -4,6 +4,7 @@
  */
 
 #include "abti.h"
+#include "real_pthread.h"
 
 ABTD_XSTREAM_LOCAL ABTI_sub_xstream *lp_ABTI_sub_xstream = NULL;
 
@@ -375,7 +376,7 @@ int ABTI_sub_xstream_back_to_main(ABTI_thread *p_this_thread)
      * allocation of sub ESes here, assuming this function is not called
      * in scheduler context. */
     while (!ABTI_sub_xstream_exit_main(p_this_thread)) {
-        sched_yield();
+        real_sched_yield();
     };
 
     ABTI_xstream *p_xstream = ABTI_local_get_xstream();
@@ -387,7 +388,7 @@ int ABTI_sub_xstream_back_to_main(ABTI_thread *p_this_thread)
     if (p_local != p_main) {
         /* Wait until the main ES surely sleeps */
         while (!ABTD_atomic_load_uint32(&p_main->ready)) {
-            sched_yield();
+            real_sched_yield();
         }
         p_main->ready = 0;
 
@@ -458,7 +459,7 @@ int ABTI_sub_xstream_list_local_init(ABTI_sub_xstream_list_local *p_sub_list,
 
         /* Wait until a newly-created sub ES sleeps */
         while (!ABTD_atomic_load_uint32(&p_sub_xstream->ready)) {
-            sched_yield();
+            real_sched_yield();
         }
 
         ABTI_sub_xstream_list_add(p_sub_list, p_sub_xstream);
@@ -702,7 +703,7 @@ int ABTI_sub_xstream_allocator_init(ABTI_sub_xstream_allocator **pp_allocator)
 
     *pp_allocator = p_allocator;
 
-    /* wrapper of pthread_create */
+    /* wrapper of real_pthread_create */
     abt_errno = ABTD_xstream_context_create(
             ABTI_sub_xstream_allocator_fn, (void *)p_allocator,
             &p_allocator->ctx);
@@ -722,12 +723,12 @@ int ABTI_sub_xstream_allocator_free(ABTI_sub_xstream_allocator *p_allocator)
 
     /* wait until all sub ESes previously allocated are added to the list */
     while (p_allocator->create_count > 0) {
-        sched_yield();
+        real_sched_yield();
     }
 
     /* wait until the allocator surely sleeps */
     while (!p_allocator->sleep_flag) {
-        sched_yield();
+        real_sched_yield();
     }
 
     ABTD_atomic_store_uint32(&p_allocator->terminate_flag, 1);

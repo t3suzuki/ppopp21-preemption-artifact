@@ -47,13 +47,15 @@ uint32_t ABTI_global_get_initial_num_sub_xstreams(void)
 static inline
 uint32_t ABTI_global_get_mutex_max_handovers(void)
 {
-    return gp_ABTI_global->mutex_max_handovers;
+    //return gp_ABTI_global->mutex_max_handovers;
+    return 64;
 }
 
 static inline
 uint32_t ABTI_global_get_mutex_max_wakeups(void)
 {
-    return gp_ABTI_global->mutex_max_wakeups;
+    //return gp_ABTI_global->mutex_max_wakeups;
+    return 1;
 }
 
 #endif /* GLOBAL_H_INCLUDED */

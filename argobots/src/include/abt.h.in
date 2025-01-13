@@ -114,7 +114,9 @@ extern "C" {
 #define ABT_ERR_MISSING_JOIN       51  /* An ES or more did not join */
 #define ABT_ERR_FEATURE_NA         52  /* Feature not available */
 
-
+    //#define ABT_CONFIG_USE_GS 1
+//#define ABT_CONFIG_USE_FSGSBASE 1
+    
 /* Constants */
 enum ABT_xstream_state {
     ABT_XSTREAM_STATE_CREATED,
@@ -352,9 +354,30 @@ typedef struct {
     ABT_pool_print_all_fn     p_print_all;
 } ABT_pool_def;
 
+typedef struct {
+  void *addr;
+  size_t size;
+} dtv_t;
+
+typedef struct {
+  dtv_t *dtv;
+  int max_used_dtv;
+  int max_dtv;
+  size_t org_start;
+  void *init_mem;
+  size_t init_mem_size;
+} my_tls_t;
+
+typedef struct {
+  size_t id;
+  size_t offset;
+} tls_get_addr_t;
 
 /* Init & Finalize */
 int ABT_init(int argc, char **argv) ABT_API_PUBLIC;
+void ABT_set_tls(my_tls_t *my_tls) ABT_API_PUBLIC;
+void *ABT_tls_get_addr(tls_get_addr_t *a) ABT_API_PUBLIC;
+void ABT_debug(void) ABT_API_PUBLIC;
 int ABT_finalize(void) ABT_API_PUBLIC;
 int ABT_initialized(void) ABT_API_PUBLIC;
 
@@ -570,9 +593,12 @@ int ABT_mutex_attr_set_recursive(ABT_mutex_attr attr, ABT_bool recursive) ABT_AP
 
 /* Condition variable */
 int ABT_cond_create(ABT_cond *newcond) ABT_API_PUBLIC;
+int ABT_cond_create2(ABT_cond *newcond, int clkid) ABT_API_PUBLIC;
 int ABT_cond_free(ABT_cond *cond) ABT_API_PUBLIC;
 int ABT_cond_wait(ABT_cond cond, ABT_mutex mutex) ABT_API_PUBLIC;
 int ABT_cond_timedwait(ABT_cond cond, ABT_mutex mutex,
+                       const struct timespec *abstime) ABT_API_PUBLIC;
+int ABT_cond_clockwait(ABT_cond cond, ABT_mutex mutex, int clkid,
                        const struct timespec *abstime) ABT_API_PUBLIC;
 int ABT_cond_signal(ABT_cond cond) ABT_API_PUBLIC;
 int ABT_cond_broadcast(ABT_cond cond) ABT_API_PUBLIC;

@@ -1,3 +1,6 @@
+#include <asm/prctl.h>
+#include <sys/prctl.h>
+#include <abti.h>
 /* -*- Mode: C; c-basic-offset:4 ; indent-tabs-mode:nil ; -*- */
 /*
  * See COPYRIGHT in top-level directory.
@@ -31,12 +34,14 @@ void ABTD_thread_func_wrapper(int func_upper, int func_lower,
 #define ABTD_thread_func_wrapper_sched  ABTD_thread_func_wrapper
 #endif
 
+void ABTI_set_gsbase(ABTD_thread_context *p_newctx);
+
 static inline
 int ABTDI_thread_context_create(ABTD_thread_context *p_link,
-                               void (*f_wrapper)(void *),
-                               void (*f_thread)(void *), void *p_arg,
-                               size_t stacksize, void *p_stack,
-                               ABTD_thread_context *p_newctx)
+				void (*f_wrapper)(void *),
+				void (*f_thread)(void *), void *p_arg,
+				size_t stacksize, void *p_stack,
+				ABTD_thread_context *p_newctx)
 {
     int abt_errno = ABT_SUCCESS;
 #if defined(ABT_CONFIG_USE_FCONTEXT)
@@ -50,7 +55,9 @@ int ABTDI_thread_context_create(ABTD_thread_context *p_link,
     p_newctx->f_thread = f_thread;
     p_newctx->p_arg = p_arg;
     p_newctx->p_link = p_link;
-
+#if defined(ABT_CONFIG_USE_GS)
+    ABTI_set_gsbase(p_newctx);
+#endif
     return abt_errno;
 
 #else
@@ -181,13 +188,26 @@ int ABTD_thread_context_arm_thread(size_t stacksize, void *p_stack,
 /* Currently, nothing to do */
 #define ABTD_thread_context_free(p_ctx)
 
+extern int arch_prctl(int code, unsigned long *addr);
+static inline void
+write_gsbase(unsigned long *gsbase) {
+#if defined(ABT_CONFIG_USE_FSGSBASE)
+  _writegsbase_u64(gsbase);
+#else
+  arch_prctl(ARCH_SET_GS, gsbase);
+#endif
+}
+
 static inline
 void ABTD_thread_context_switch(ABTD_thread_context *p_old,
                                 ABTD_thread_context *p_new)
 {
 #if defined(ABT_CONFIG_USE_FCONTEXT)
+#if defined(ABT_CONFIG_USE_GS)
+  //printf("%p %p\n", p_new, p_new->gsbase);
+  write_gsbase(p_new->gsbase);
+#endif
     jump_fcontext(&p_old->fctx, p_new->fctx, p_new);
-
 #else
     int ret = swapcontext(p_old, p_new);
     ABTI_ASSERT(ret == 0);
