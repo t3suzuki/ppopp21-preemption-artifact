@@ -32,6 +32,7 @@ int ABT_cond_create(ABT_cond *newcond)
 
     p_newcond = (ABTI_cond *)ABTU_malloc(sizeof(ABTI_cond));
     ABTI_cond_init(p_newcond);
+    p_newcond->clkid = CLOCK_REALTIME;
 
     /* Return value */
     *newcond = ABTI_cond_get_handle(p_newcond);
