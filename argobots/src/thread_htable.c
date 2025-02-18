@@ -5,6 +5,7 @@
 
 #include "abti.h"
 #include "abti_thread_htable.h"
+#include "real_pthread.h"
 
 ABTI_thread_htable *ABTI_thread_htable_create(uint32_t num_rows)
 {

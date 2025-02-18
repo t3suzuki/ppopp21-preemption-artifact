@@ -262,6 +262,9 @@ struct ABTI_global {
 #endif
 
     ABT_bool print_config;      /* Whether to print config on ABT_init */
+#if defined(ABT_CONFIG_USE_GS)
+    my_tls_t *my_tls;
+#endif
 };
 
 struct ABTI_local {

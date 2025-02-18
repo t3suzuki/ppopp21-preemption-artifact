@@ -4,6 +4,7 @@
  */
 
 #include "abti.h"
+#include "real_pthread.h"
 
 ABTD_XSTREAM_LOCAL ABTI_sub_xstream *lp_ABTI_sub_xstream = NULL;
 
@@ -704,7 +705,7 @@ int ABTI_sub_xstream_allocator_init(ABTI_sub_xstream_allocator **pp_allocator)
 
     *pp_allocator = p_allocator;
 
-    /* wrapper of pthread_create */
+    /* wrapper of real_pthread_create */
     abt_errno = ABTD_xstream_context_create(
             ABTI_sub_xstream_allocator_fn, (void *)p_allocator,
             &p_allocator->ctx);

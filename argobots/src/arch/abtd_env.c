@@ -8,7 +8,7 @@
 #include <strings.h>
 
 #define ABTD_KEY_TABLE_DEFAULT_SIZE     4
-#define ABTD_THREAD_DEFAULT_STACKSIZE   1048576
+#define ABTD_THREAD_DEFAULT_STACKSIZE   (1048576*4)
 #define ABTD_SCHED_DEFAULT_STACKSIZE    (4*1024*1024)
 #define ABTD_SCHED_EVENT_FREQ           50
 #define ABTD_SCHED_SLEEP_NSEC           100
@@ -133,7 +133,8 @@ void ABTD_env_init(ABTI_global *p_global)
     /* Preemption timer type */
     env = getenv("ABT_PREEMPTION_TIMER_TYPE");
     if (env == NULL) env = getenv("ABT_ENV_PREEMPTION_TIMER_TYPE");
-    p_global->preemption_timer_type = ABTI_PREEMPTION_TIMER_DEDICATED;//ABTI_PREEMPTION_TIMER_SIGNAL;
+    //p_global->preemption_timer_type = ABTI_PREEMPTION_TIMER_SIGNAL;
+    p_global->preemption_timer_type = ABTI_PREEMPTION_TIMER_DEDICATED;
     if (env != NULL) {
         if (strcasecmp(env, "signal") == 0) {
             p_global->preemption_timer_type = ABTI_PREEMPTION_TIMER_SIGNAL;

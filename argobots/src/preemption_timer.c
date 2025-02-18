@@ -4,6 +4,7 @@
  */
 
 #include "abti.h"
+#include "real_pthread.h"
 
 /* used for dedicated timer threads */
 ABTD_XSTREAM_LOCAL ABTI_preemption_group *lp_ABTI_preemption_group = NULL;

@@ -4,10 +4,12 @@
  */
 
 #include "abti.h"
+#include "real_pthread.h"
 #include <signal.h>
 #include <unistd.h>
 #include <sys/syscall.h>
 #include <linux/futex.h>
+#include <errno.h>
 
 #define sigev_notify_thread_id _sigev_un._tid
 
@@ -356,6 +358,8 @@ int ABTD_signal_sleep(void (*callback_fn)(void *), void *p_arg)
     return abt_errno;
 }
 
+#define MY_SYS_FUTEX (500)
+
 int ABTD_futex_sleep(int *p_sleep_flag,
                      void (*callback_fn)(void *), void *p_arg)
 {
@@ -365,8 +369,7 @@ int ABTD_futex_sleep(int *p_sleep_flag,
     if (callback_fn) {
         callback_fn(p_arg);
     }
-    //syscall(SYS_futex, p_sleep_flag, FUTEX_WAIT, 1, NULL, NULL, 0);
-    syscall(SYS_futex, p_sleep_flag, FUTEX_WAIT, 1, NULL, 0xdeadcafe, 0);
+    syscall(MY_SYS_FUTEX, p_sleep_flag, FUTEX_WAIT, 1, NULL, NULL, 0);
 
     return abt_errno;
 }
@@ -377,7 +380,7 @@ int ABTD_futex_wakeup(int *p_sleep_flag)
     int tmp;
 
     int val3 = FUTEX_OP(FUTEX_OP_SET, 0, FUTEX_OP_CMP_EQ, 1);
-    syscall(SYS_futex, &tmp, FUTEX_WAKE_OP, 0, 1, p_sleep_flag, val3);
+    syscall(MY_SYS_FUTEX, &tmp, FUTEX_WAKE_OP, 0, 1, p_sleep_flag, val3);
 
     return abt_errno;
 }

@@ -4,6 +4,7 @@
  */
 
 #include "abti.h"
+#include "real_pthread.h"
 
 int ABTD_xstream_context_create(void *(*f_xstream)(void *), void *p_arg,
                                 ABTD_xstream_context *p_ctx)

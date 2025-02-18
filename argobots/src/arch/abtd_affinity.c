@@ -4,6 +4,7 @@
  */
 
 #include "abti.h"
+#include "real_pthread.h"
 #include <unistd.h>
 
 #ifdef HAVE_PTHREAD_SETAFFINITY_NP

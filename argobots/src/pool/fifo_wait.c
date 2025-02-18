@@ -4,6 +4,7 @@
  */
 
 #include "abti.h"
+#include "real_pthread.h"
 
 /* FIFO_WAIT pool implementation */
 
