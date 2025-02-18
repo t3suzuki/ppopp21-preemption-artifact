@@ -372,7 +372,7 @@ void ABTI_set_gsbase(ABTD_thread_context *p_newctx)
     }
     memcpy(p, my_tls->dtv_init_static_mem, my_tls->dtv_init_static_mem_size);
     p_newctx->gsbase = (unsigned long *)(p + my_tls->dtv_init_static_mem_size);
-    printf("gsbase %p\n", p_newctx->gsbase);
+    //printf("gsbase %p\n", p_newctx->gsbase);
     p_newctx->dtv = dtv;
     *(uint64_t *)p_newctx->gsbase = (uint64_t)p_newctx->gsbase;
 #endif
