@@ -34,7 +34,9 @@ void ABTD_thread_func_wrapper(int func_upper, int func_lower,
 #define ABTD_thread_func_wrapper_sched  ABTD_thread_func_wrapper
 #endif
 
+#if defined(ABT_CONFIG_USE_GS)
 void ABTI_set_gsbase(ABTD_thread_context *p_newctx);
+#endif
 
 static inline
 int ABTDI_thread_context_create(ABTD_thread_context *p_link,
@@ -141,7 +143,9 @@ int ABTD_thread_context_invalidate(ABTD_thread_context *p_newctx)
     p_newctx->f_thread = NULL;
     p_newctx->p_arg = NULL;
     p_newctx->p_link = NULL;
+#if defined(ABT_CONFIG_USE_GS)
     ABTI_set_gsbase(p_newctx);
+#endif
 
     return abt_errno;
 #endif
