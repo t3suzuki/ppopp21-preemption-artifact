@@ -141,6 +141,8 @@ int ABTD_thread_context_invalidate(ABTD_thread_context *p_newctx)
     p_newctx->f_thread = NULL;
     p_newctx->p_arg = NULL;
     p_newctx->p_link = NULL;
+    ABTI_set_gsbase(p_newctx);
+
     return abt_errno;
 #endif
 }
@@ -204,7 +206,7 @@ void ABTD_thread_context_switch(ABTD_thread_context *p_old,
 {
 #if defined(ABT_CONFIG_USE_FCONTEXT)
 #if defined(ABT_CONFIG_USE_GS)
-  //printf("%p %p\n", p_new, p_new->gsbase);
+  //printf("%p => %p gs=%p\n", p_old, p_new, p_new->gsbase);
   write_gsbase(p_new->gsbase);
 #endif
     jump_fcontext(&p_old->fctx, p_new->fctx, p_new);
@@ -219,6 +221,10 @@ void ABTD_thread_finish_context(ABTD_thread_context *p_old,
                                 ABTD_thread_context *p_new)
 {
 #if defined(ABT_CONFIG_USE_FCONTEXT)
+#if defined(ABT_CONFIG_USE_GS)
+  //printf("%p => %p gs=%p\n", p_old, p_new, p_new->gsbase);
+  write_gsbase(p_new->gsbase);
+#endif
     take_fcontext(&p_old->fctx, p_new->fctx, p_new);
 #else
     int ret = swapcontext(p_old, p_new);

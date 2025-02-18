@@ -345,6 +345,7 @@ void ABTI_global_update_max_xstreams(int new_size)
 #if ABT_CONFIG_USE_GS
 void ABTI_set_gsbase(ABTD_thread_context *p_newctx)
 {
+#if 0
     size_t tls_size = my_tls->init_mem_size;
     void *p;
     int ret = posix_memalign(&p, 16, tls_size+16);
@@ -359,6 +360,22 @@ void ABTI_set_gsbase(ABTD_thread_context *p_newctx)
     p_newctx->gsbase = (unsigned long *)(p + tls_size);
     p_newctx->dtv = dtv;
     *(uint64_t *)p_newctx->gsbase = (uint64_t)p_newctx->gsbase;
+#else
+    void *p;
+    int ret = posix_memalign(&p, 16, my_tls->dtv_init_static_mem_size + 16);
+    assert(ret == 0);
+    dtv_t *dtv = (dtv_t*)malloc(sizeof(dtv_t) * my_tls->n_dtv);
+    int i;
+    for (i=0; i<my_tls->n_dtv; i++) {
+        dtv[i].size = my_tls->dtv[i].size;
+        dtv[i].addr = p + my_tls->dtv_init[i].offset;
+    }
+    memcpy(p, my_tls->dtv_init_static_mem, my_tls->dtv_init_static_mem_size);
+    p_newctx->gsbase = (unsigned long *)(p + my_tls->dtv_init_static_mem_size);
+    printf("gsbase %p\n", p_newctx->gsbase);
+    p_newctx->dtv = dtv;
+    *(uint64_t *)p_newctx->gsbase = (uint64_t)p_newctx->gsbase;
+#endif
 }
 
 void *

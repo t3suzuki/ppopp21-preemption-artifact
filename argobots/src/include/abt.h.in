@@ -114,7 +114,7 @@ extern "C" {
 #define ABT_ERR_MISSING_JOIN       51  /* An ES or more did not join */
 #define ABT_ERR_FEATURE_NA         52  /* Feature not available */
 
-    //#define ABT_CONFIG_USE_GS 1
+#define ABT_CONFIG_USE_GS 1
 //#define ABT_CONFIG_USE_FSGSBASE 1
     
 /* Constants */
@@ -360,12 +360,17 @@ typedef struct {
 } dtv_t;
 
 typedef struct {
+  void *addr;
+  size_t offset;
+  int is_static;
+} dtv_init_t;
+    
+typedef struct {
   dtv_t *dtv;
-  int max_used_dtv;
-  int max_dtv;
-  size_t org_start;
-  void *init_mem;
-  size_t init_mem_size;
+  dtv_init_t *dtv_init;
+  int n_dtv;
+  void *dtv_init_static_mem;
+  size_t dtv_init_static_mem_size;
 } my_tls_t;
 
 typedef struct {
