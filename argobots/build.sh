@@ -1,4 +1,5 @@
 ./autogen.sh
 #./configure --prefix=$PWD/install --enable-affinity --enable-fast=O3 --enable-debug
-./configure --prefix=$PWD/install --enable-affinity --enable-fast=O3
+#./configure --prefix=$PWD/install --enable-affinity --enable-fast=O3
+CFLAGS="-march=native" CPPFLAGS="-march=native" ./configure --prefix=$PWD/install --enable-affinity --enable-fast=O3
 make && make install

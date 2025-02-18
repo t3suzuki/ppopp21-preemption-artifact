@@ -1,3 +1,4 @@
+#include <x86intrin.h>
 #include <asm/prctl.h>
 #include <sys/prctl.h>
 #include <abti.h>
@@ -198,7 +199,7 @@ extern int arch_prctl(int code, unsigned long *addr);
 static inline void
 write_gsbase(unsigned long *gsbase) {
 #if defined(ABT_CONFIG_USE_FSGSBASE)
-  _writegsbase_u64(gsbase);
+  _writegsbase_u64((uint64_t)gsbase);
 #else
   arch_prctl(ARCH_SET_GS, gsbase);
 #endif
